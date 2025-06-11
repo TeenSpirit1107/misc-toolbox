@@ -6,30 +6,35 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
-# Check if openssh-server is installed
-if dpkg -l | grep -q openssh-server; then
-  echo "OpenSSH Server is already installed."
-else
-  echo "Updating package index..."
-  apt update
+echo "Enabling UFW firewall (if not already enabled)..."
+ufw enable
 
-  echo "Installing OpenSSH Server..."
-  apt install -y openssh-server
+# Check if openssh-server is installed
+echo "Have you installed openssh-server on this machine? If not sure, choose n. [Y/n]"
+read -r response
+
+if [[ "$response" =~ ^[Yy]$ ]]; then
+    if dpkg -l | grep -q openssh-server; then
+    echo "OpenSSH Server is already installed."
+    else
+        echo "Installing OpenSSH Server..."
+        apt update
+        apt install -y openssh-server
+    fi
 fi
 
 echo "Enabling and starting SSH service..."
 systemctl enable ssh
 systemctl start ssh
 
-echo "Checking SSH service status..."
-systemctl status ssh --no-pager
-
 # Ask user whether to enable secure mode
 read -p "Do you want to enable secure mode (only allow specific IP to connect)? [y/N] " SECURE_MODE
 
 if [[ "$SECURE_MODE" =~ ^[Yy]$ ]]; then
-    echo "Please run ssh_client.sh on the CLIENT machine to get the IP address."
-    read -p "Enter the CLIENT's IP address here: " ALLOWED_IP"
+    echo "Please run the following command on the CLIENT machine to get the IP address."
+    echo "   hostname -I | awk '{print \$1}'"
+    echo "Enter the CLIENT's IP address here:"
+    read -r ALLOWED_IP
     echo "Allowing SSH access only from IP: $ALLOWED_IP"
     ufw allow from "$ALLOWED_IP" to any port 22 proto tcp
 else
@@ -37,10 +42,10 @@ else
     ufw allow ssh
 fi
 
-echo "Enabling UFW firewall (if not already enabled)..."
-ufw enable
+HOST_USERNAME=$(whoami)
+HOST_IP=$(hostname -I | awk '{print $1}')
 
-echo "Displaying current firewall status..."
-ufw status
+echo "SSH setup is complete. You can use the CLIENT device to connect by running:"
+echo "   ssh $HOST_USERNAME@$HOST_IP"
+echo "After taht, you can close this terminal."
 
-echo "SSH setup is complete. You can use the CLIENT device to run ssh_client.sh to connect."

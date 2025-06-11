@@ -27,8 +27,19 @@ systemctl start ssh
 echo "Checking SSH service status..."
 systemctl status ssh --no-pager
 
-echo "Allowing SSH access only from IP: $ALLOWED_IP"
-ufw allow from "$ALLOWED_IP" to any port 22 proto tcp
+# Ask user whether to enable secure mode
+read -p "Do you want to enable secure mode (only allow specific IP to connect)? [y/N] " SECURE_MODE
+
+if [[ "$SECURE_MODE" =~ ^[Yy]$ ]]; then
+    echo "Please run this command on the other device:"
+    echo "  hostname -I | awk '{print \$1}'"
+    read -p "Enter the IP address here: " ALLOWED_IP""
+    echo "Allowing SSH access only from IP: $ALLOWED_IP"
+    ufw allow from "$ALLOWED_IP" to any port 22 proto tcp
+else
+    echo "Allowing SSH access from any IP address..."
+    ufw allow ssh
+fi
 
 echo "Enabling UFW firewall (if not already enabled)..."
 ufw enable

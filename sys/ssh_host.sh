@@ -47,5 +47,5 @@ HOST_IP=$(hostname -I | awk '{print $1}')
 
 echo "SSH setup is complete. You can use the CLIENT device to connect by running:"
 echo "   ssh $HOST_USERNAME@$HOST_IP"
-echo "After taht, you can close this terminal."
+echo "After that, you can close this terminal."
 

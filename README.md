@@ -37,6 +37,18 @@
 
 1. Install the dependencies
 
-    ```sh
+    ```shell
     pip install -r requirements.txt
+    ```
+
+2. for a bash file named `file_name.sh`, you may have to run this before executing it:
+
+    ```shell
+    chmod +x file_name.sh
+    ```
+
+3. some bash files need to be run as root:
+
+    ```shell
+    sudo ./file_name.sh
     ```

@@ -6,9 +6,6 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
-# Get allowed IP from user
-read -p "Enter the IP address of the device that should be allowed to SSH into this machine: " ALLOWED_IP
-
 # Check if openssh-server is installed
 if dpkg -l | grep -q openssh-server; then
   echo "OpenSSH Server is already installed."
@@ -31,9 +28,8 @@ systemctl status ssh --no-pager
 read -p "Do you want to enable secure mode (only allow specific IP to connect)? [y/N] " SECURE_MODE
 
 if [[ "$SECURE_MODE" =~ ^[Yy]$ ]]; then
-    echo "Please run this command on the other device:"
-    echo "  hostname -I | awk '{print \$1}'"
-    read -p "Enter the IP address here: " ALLOWED_IP""
+    echo "Please run ssh_client.sh on the CLIENT machine to get the IP address."
+    read -p "Enter the CLIENT's IP address here: " ALLOWED_IP"
     echo "Allowing SSH access only from IP: $ALLOWED_IP"
     ufw allow from "$ALLOWED_IP" to any port 22 proto tcp
 else
@@ -47,6 +43,4 @@ ufw enable
 echo "Displaying current firewall status..."
 ufw status
 
-echo "SSH setup is complete."
-echo "You can connect from the allowed device using:"
-echo "  ssh username@$(hostname -I | awk '{print $1}')"
+echo "SSH setup is complete. You can use the CLIENT device to run ssh_client.sh to connect."
